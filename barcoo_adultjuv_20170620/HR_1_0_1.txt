@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --job-name="sleepyHR"
+#SBATCH --time=0-0:15:00
+#### Make array * tasks = 1000
+### use array 0 to n - 1
+#   SBATCH --array=0-0
+#   SBATCH --ntasks=1
+#SBATCH --array=0-99
+#SBATCH --ntasks=1
+#SBATCH --mem-per-cpu=32768
+
+module load R-gcc/3.2.3
+
+cd /vlsci/VR0212/mrke/achaves/abm
+
+for i in `seq 1 $SLURM_NTASKS`
+do
+    srun --nodes=1 --ntasks=1 --cpus-per-task=1 R --no-save --args $(($SLURM_ARRAY_TASK_ID*$SLURM_NTASKS+$i)) < HR_1_0_1.R &
+done
+# IMPORTANT must wait for all to finish, or all get killed
+wait
